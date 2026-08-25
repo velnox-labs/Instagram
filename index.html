@@ -177,13 +177,98 @@
   .edit-hint{
     text-align:center;color:var(--muted);font-size:11px;padding:10px 20px 0;
   }
+
+  /* ===== Interactive states for action icons ===== */
+  .act, .save{-webkit-tap-highlight-color:transparent;}
+  .act.pop .ic, .save.pop .ic{animation:actPop .35s ease;}
+  @keyframes actPop{
+    0%{transform:scale(1);}
+    35%{transform:scale(1.3);}
+    60%{transform:scale(0.92);}
+    100%{transform:scale(1);}
+  }
+  .icon-active{
+    filter:invert(35%) sepia(64%) saturate(2500%) hue-rotate(310deg) brightness(95%) contrast(101%);
+  }
+
+  /* ===== Toast (bottom notice) ===== */
+  .toast{
+    position:fixed;left:50%;bottom:74px;
+    transform:translateX(-50%) translateY(8px);
+    background:#2b2b2b;color:#f5f5f5;
+    padding:12px 22px;border-radius:16px;
+    font-size:13.5px;font-weight:500;
+    max-width:80%;text-align:center;
+    box-shadow:0 6px 18px rgba(0,0,0,0.5);
+    opacity:0;pointer-events:none;
+    transition:opacity .25s ease, transform .25s ease;
+    z-index:2000;
+  }
+  .toast.show{
+    opacity:1;transform:translateX(-50%) translateY(0);
+  }
+
+  /* ===== Comments bottom sheet ===== */
+  .comments-overlay{
+    position:fixed;inset:0;background:rgba(0,0,0,0);
+    display:flex;align-items:flex-end;justify-content:center;
+    z-index:1500;opacity:0;pointer-events:none;
+    transition:opacity .25s ease, background .25s ease;
+  }
+  .comments-overlay.open{
+    opacity:1;pointer-events:auto;background:rgba(0,0,0,0.6);
+  }
+  .comments-sheet{
+    width:100%;max-width:480px;max-height:72vh;
+    background:#0a0a0a;border-radius:18px 18px 0 0;
+    display:flex;flex-direction:column;
+    transform:translateY(100%);
+    transition:transform .3s ease;
+    border:1px solid var(--border);border-bottom:none;
+  }
+  .comments-overlay.open .comments-sheet{transform:translateY(0);}
+  .sheet-handle{
+    width:36px;height:4px;background:#444;border-radius:4px;
+    margin:10px auto 6px;
+  }
+  .sheet-header{
+    text-align:center;font-size:14px;font-weight:600;
+    padding:6px 12px 12px;border-bottom:1px solid var(--border);
+    position:relative;
+  }
+  .sheet-header .close-sheet{
+    position:absolute;right:14px;top:0;color:var(--muted);
+    font-size:18px;cursor:pointer;line-height:1;
+  }
+  .comments-list{overflow-y:auto;padding:10px 14px;flex:1;}
+  .comment-row{display:flex;gap:10px;padding:9px 0;}
+  .comment-row img{
+    width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;
+  }
+  .comment-body{flex:1;font-size:13.5px;line-height:1.4;}
+  .comment-body b{margin-right:5px;}
+  .comment-meta{color:var(--muted);font-size:11.5px;margin-top:3px;display:flex;gap:12px;}
+  .comment-heart{color:var(--muted);flex-shrink:0;font-size:13px;padding-top:4px;}
+  .comment-composer{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 14px 16px;border-top:1px solid var(--border);
+  }
+  .comment-composer img{width:28px;height:28px;border-radius:50%;object-fit:cover;}
+  .comment-composer input{
+    flex:1;background:#1a1a1a;border:1px solid var(--border);
+    border-radius:20px;padding:9px 14px;color:var(--text);font-size:13px;outline:none;
+  }
+  .comment-composer button{
+    background:none;border:none;color:var(--accent);font-weight:600;
+    font-size:13.5px;cursor:pointer;
+  }
 </style>
 </head>
 <body>
 
   <div class="topbar">
     <div class="logo">Instagram</div>
-    <button class="icon-btn">
+    <button class="icon-btn" id="topbarBtn">
       <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAE0AAABFCAYAAAAPWmvdAAAIdklEQVR4nO2cd6xVRRCHv6vAQ8EEFQFRUewag6ixYO+9NzQ2FKOiwUqIRhNb0BhrNIpBI0jsSqxYiBU7ihprFI3YFRSe8kBiW/+Ye2Dvvp3dPfeeW57xl9y8c7bN7JzZ3dmd2VcyxvTgf+TCMgW3V4qklzxp9YYpusE8QislMKDl+9JNIK9IhD5OVbRjQrMJmggDKcz40hulcT64/UtCt0h+tVpQArYCepbbmAN8mlDH1r6S59nHn5u3PjCgnP47MCNAM48iLEFMaD5onRsC7AfsBgxT2m4HPgfeAp4FXgQWoA/9UKf6ADsDewCbAWsDK3rK/QG8BjwPTAU+dPriew6iVMXqaXewJ3AcMBJhvBpMB84FPkgsvxMwDtiySnrvAOOByZ68EvAPEQHWIrSRwNVAr5z1NUwCzgfmK/kDgWuBQwuiNx8YBTyct2I1QgP5SsOrqBdDR7ndZ530Q8o062FTjgfOzlMhE1o23GLjenXgUWCT3Kzlwwjg3vLzSUjH6onXEQ2el1I4pmn2RLwp8CTQN5GRRcBPwI/IPNEN2DqxLsBYoA24PLH8H8C7wF9lWv2A/sDyifVnA3uV/waRMjwNMAh4D+idQHgycCfwbbnuMlSujHsChyHDcLkYgxHMB+4HHgFeUMqsAZwInICMlBC+A4YCvwVLGWN6WL/uznuW9rYJ41djzOiEtnoYY9rKfwcYY8ZH2g3hCmPMSgoN7XeWMaYj0u6jAf7bjDE9bKF1dzPLv1siRJ4wxgxMYLjNec/oDTPG/BKhYeNzY8wGiW37foOMMc9HaJznqbekzdjw3Kes+hquBC6x3l3DN0uLYT3gbcTuC+FbZKfxS4CGayhrhvM1wOgArc2Bj3wZsb3nTYG8i6gUmKEzs6lW9iziJsxfwMHAzwoNe9tlQ9sKjkEEp+F6LSMktBORSdSHNxDD1kaKgEJ72acJf/kRwPsBmu4Hi9E2wIUo2oTsPIb5MkJCO1NJXwwcE6gXQkywE4BnPOlTgAcRflNOJlJOU7L3YwP8jPIlZkJzG9wc2Fhp6GpkbikKbgdHIjuDDPOA05WyReBj5GP5MBxYwU3MhOYyc7TSSDuBsV4l3A82l0qD9uIyXajfgeU4ZM704UA3QRue+ynptwALq2AqL25AdhOzqdSCeh1Y/gjcreTt5Sb4NG0AsI7SwLTq+cqNM1g6LKFydayHxvnmUpAzuwr47LS9kU25i8XIwV+RDKf4HRoBgxxg/qTkr4bYhgYqh2fG/LpKxTco/iu3gsBAPl478JmSPxiLV1tomfr3UyrOccrVG410uGS0vlHyKzb67gkEnvcM7olqvTvVSC3MaGmmVH/7xTUWAf5UKrZT2ZFWGVpFYq6S3sd6LvlMDq1i5hb7L0M7YG23no1P0+bgx+r89zVtkJJesar65jRNaANpTixGI6Gd7P6As3q6QpulVNwIWLV2vloWayDeeR++xlISd3iWEFX8Uql8WBHctSiOUNK/BL63E9yFIPM+aU6KI2vjq6WhHVJMxRmN2ob9JSV9a2BH672rLQYav/sjsSg+TMOZvzUfQW/gK/wuu8/KBLqawDQsi5ypreXJmwusCfyNtU/WNK2DzsfZGdYHTklgphVW1xQezsEvMICrEEd3ZaOWpmXzWRY50xtZNXza9idyujuLrq1xmyIhCct68joQE+R3N8O3Yc+EtxC4QCHWHXiArm3s9kK88z6BAVyKR2CQFgDzErCN0vADiGOiFYZiXjyC+HV9mAlsa71XBBfajhWt4yfjGddlHEllRE9XEF4JuAddYP8AxxNwCaZEd88CTg3kj2SpI6ReR9FF4mbCRvoYJMTVpwAlSA+JnwzcGMgfC1xnN0xYeM0QbAm4HfnIGu5ChKrBQP5IyKnA7oH82xGHiIZG+QR8Ac53oW+VAF4m3LclSI1PyxjoBTxHOCj5PiQWrFlwBdYTWbA6ueIszCznLwi0swTVxNz2QULMNTcfyIp7CI3xkYa0dyXgKSRQT8O7iIZloflRxOY0nx3WXiYyO1BvJ+SOwCopTNQITWBrIR93aKDuDKQvHYEynZB6zSczSTIGvwe2Bz4J1B2ChJxulYehnNAEtgsy5AYH6k5HQlkzgSWbS6mrp73FyjAXOfGYGajXFxmqo/MwlQO+NscgYVuh+OAngX1RLP4Y8tzC833V35CvOiVC4xpgIrL9KhLuSLgVCWYJYSJip9let9Atwc5Eq1gINJzBUltNw5vAQei3UvLAXt26Iav2AZE65yM81qT1RQoNZJ6bQqWf0MUXyPKuebPz3ozrhQT87RYpN5xw/HAyihYaiPNlGrqTAsTjtTd66GaqETwQmZ82CpRZCByO3MKzUdW1RSjuOrbdwR+AHZCVU0M/4BVgu0B7ruBcIW6B3KgLCewjZBV3BQY1DNFaheZGVmdoB3ZFbDUNyyOd0aK6XU2wnw9EnD+++50ZXkXsxSJDXYHahRYaQguRueveQBmQw4DQtsulMRaZw9oCdR5C5rgFgTJN07QUjCAepzsBfaNvd2488QtmE0iLPtfOCKMoaiFImVTPRW64hDAROM2TvgKiPTtH6o8DLouUqRn1WD1DOB64LVJmKpW3hwcBjwMbRuqNAu6onrV0NFpoIAKJzXNvAUch5stjyGmFhkWISfFcIdwloNFCyyb1bZC74ysHyi4mfsFsHvLfEj6MlCsUjRCaZqj2Rc66tHCAGD5FNt2FmxQxNGL11MySn5GJfXoVbc5ADOhMYA31OTRCaCEsQobXfTnqPITscX+10hrqOmy20DKcgKx+iyPljkJssKZGZNZbaLEO2cPqDmR+m+QpNwn5txb2Px5xbzA3DM0wOTS4C8ZQ5GZcQ1fGFLSS0LoMWmVOy4umhj40W2jVdr6pgTb/At8h+bG8t2asAAAAAElFTkSuQmCC" class="ic ic-h28">
     </button>
   </div>
@@ -229,7 +314,7 @@
           <span class="sub">Original audio</span>
         </div>
       </div>
-      <svg class="ig" width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.5" fill="currentColor" stroke="none"/></svg>
+      <svg class="ig" id="moreMenuBtn" width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.5" fill="currentColor" stroke="none"/></svg>
     </div>
     <div class="post-media" id="postMedia">
       <img src="https://picsum.photos/seed/postmain/800/800" alt="post">
@@ -249,19 +334,19 @@
           </svg>
           <b id="likeCount">128</b>
         </span>
-        <span class="act">
+        <span class="act" id="commentBtn">
           <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEQAAABHCAYAAAC+h+EcAAAFNklEQVR4nOWc227jNhCGPwlt+kyNgdgtmj5UskicoknfqQts5IXtd9q9iPaCmpiiODxIcixpf8CwLFGj4a/hzPDkoq7rK4ahBormuGh+x1AAb9Z9Oc84K8oRZNgkpJAh5XKe3ecZvTAWIfIRpCidW7HC+T4LxiDE9+bGkHsR/HImudLmhaQb4I/meGNdv27OHZrfr7Qt4Mk6TvVPg1CM4FR9WGOUf+JU6b44ADva5MCZHO3YhDxiLGAoCRqOQEWXnNEwFiEPwP0IcnLwDPzTHI9mLUMJWQP/j6HIANjEDEbfaLAGvnB5MsBY5jdMcx2MPlHmEbjLvOfQfFfAV05ZatV83zTfa+ue3CZ418jYZt7XQm6TySHjwImAKlAu1P7XGCe9BlaJzx3UhHIIeSUtehwwUWDXV6kAUp33EUMkZDrbFEJugM8Jss5JhI0tpsmlEPM3mfqkEPItcn1sIlJDaGrz/S3n4S4hrjKxZnLklJJfCl8I+5cDJx2jRJdOIfv4kTAZL1yeDDA6PAeurzB10erZQom/wxQzxxdMM/mQQZsICowuL4Ey97TDsdS5o7/dZKS55JBx9t5nJmK6R52sz4d8D5R/5kTGFAmBcGiO+jw3dd8Gyh4xCY+Y2RTJAKPjQbl2TTsb7sC1kFCIzQpfE0Ao+qh1sS3kISA85MWnitCYiVpX20I06xi1e/3ByLYSsZBtQOgUQmtfhKzEO1wghGiORqLKnGA7+x26g934TkqT0ZrLFfO2EAiP6nXykhJ9pEmmBlxMMdz6dBLdQ1bSkVOimA56RjdFi4m9OK0urjEUJXoHzifEfRNTtBYfKuX8CqcOoUFmV4hv/naK1uLDDtgr11qpvEaIJGKhCey5kCEIjdu+QyNk6v2VPkga0dMIWRIRgko5n9RktJuXiGSnujRoPqRFSFHXta95LCFDtSGDWdGM/GeykCRohARHlWaIGr1OrS7Kz2AhUtlN5DoQJ2QJfiSWQlR2WY2QTaKwpaGIEbIkbJTzWU1mSXhTzr/aP7Q8BHosJZg4tBykNdhckjnmOFMkjwqW6IPIS8pFtPneHRl9mRXzJ6UmvDqxYwwlhqWjckNnzLGfXheDu7LRhnc2UixEc56ulcwtLwmtXvS+XJmXCS2DOAB/WkLmREpovUhwKrNAn9C2rWQOZNhvfqOUUSfvU5dD2FYyJ2j1ucUsKO7AjTK3ioAVp4xuDlYiOqbO2L3DJeRrQMg13dV8U4Q9f6QFC3UC3yVEVvRpuKMdii9hLbHJMlunSpGhLjd1CakxrIaWONqkDLGWpHWjHtgV9kW9lDldOG2Da0HLVJ+A/wLChJQhFlIrx6FyIQg5LrmaC9h6ygZn7rboGSwYUkJvQKtIbuVj1mNvk/WVzVrw4yPENsPY0u3fMaHNt4it79qSnN3h7nPUFcoeeP2IEGKz7Cr0V4LwewwpsWbkriBIue7Kk+1t3zEvQ7aX2RHQ9SOapXf7OXVdXyV+9nUa/nXu+zXjGe7Hvvc2UYd9o8Ntgu5795m5W8xytqPKHtsd/eeKN8R3ZcTw3MjxdfI6GXgqIbZf6bMJURQTk5asV5zymlNXfWPdk7rPbghaQ6V99+32JWWKGIUQwRKIae2QGGur+yWIkb1+m+b3kOe/j430JUQbKHrAsP2Rf4ZgJ2Tig96ATxlyswjps9qwxmS6ORuQNewx+dKWtHkiW19JGEORUXaIAekWMnQJpjtYLVHFtiTpcxQYK6ia32NOloke0rxaZADF2P8fUqNvbLTxEWOzKS+xU+YHLhhYpaQzBLYAAAAASUVORK5CYII=" class="ic ic-h28">
           <b>8</b>
         </span>
-        <span class="act">
+        <span class="act" id="repostBtn">
           <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAABJCAYAAABhE0UAAAAEeElEQVR4nOWbO3ITQRCGv3VR5gbcgwBIcFmyAzgE5zBFlU1gOcEcghwOAAQgVZkE+xDk3MCJl2A9aDTqebdGi/gTaR+zPf90T09v92zX9/0+/xH2tt2Be/StBI2FcNdKUEvCHavEmmnVRkvCPXBnHR8BV8AMmLbqRNfQaXWsavXWuf4SmG+6E601bCBp9AuDtjeKsTgtgxM2THpbGp4Dl577ToDzTXWihHDuEmLmrtvuDD/p16ySVlu2SginLCfu8uPrcIz0jHXvXoVSk9ZcQ0OkzZw2A1YtN4ewvazETMzuWIo5pmg69VlB5BAOmWZo5H3Xcua00XQfkRVFKuGYEGkgcqzA3B8jfZHw3CBqIq2eIYA4ts5NEts+LZQJ8BF4RSHxEsJmPp2UCFTCC2BR0vBB5v0ztkvU4DGFhG0Nh5zSlCHWHQselja0nZb7NmMwYVxkP9U0dk3a1XCKZm8YzMsM1jfhmT3ygM5ZJgbMkjNjWHslXDJ48mJITss27Sv8HtUW7rMO93kx/ACeJMgrhuS0TOcmyGQlwaF1OpXsFRsmC0sNS1qQtHsNHAjPydHiX9ksBypkSaqZEOO0pLkrdcCMshQl5cDM1ymDGeeQrQotfYGHNOI3wPMaYQ4mwNfA9eLgIgQplvaN4GmhDEn7PWlk1fPVPqclmVipcGkALzz3uj5CPXctafjIc69mCnUinPM5xFS4gyMOVqpJXzvHNabWsT43a8ma54aOgfyXB4MaU+sZvH0HHDKQP6NsacuGRPhYOCchFF2lwHWCdohZgqS20jrsyxAmzZFK1FqOwRGeepUhnJJ0a1bSrMQ58JnhpecWh/jYSi0acN+0VqoYu0TYNx1WYopdIpw05XaJcBJ2jXAoCQHsHuGoWe8a4ShSCXfOby42GbTkFPnW0rQ+3FFXyEoK7AuRFYPbhDUScdtGcixt47tw7i3/DukgJMJz4J11fIPOy/8oBixUPZzc/y7adEUN7oY3sGpRIS+9YEm2Vjt2+9l9p25psBHNRa6XLoV5x3bLrdqlVykft5KeyvHStXksX21ZY2Opndj3XQf0Iy3foIUK6akOMTTgIYUs7GvahKX9VCGyvg0sEnxZGft8dIqUZi0lmIgntUhWUxG0682GvM8BrsjQJJxDNrUiGKs7G0yRtbtmQdombbx5bkXQh9Qdfcm7bzUI2/O2Q4+sC+mNK1RuFaeM5icAMc3Gyp+SD7DRMVjQHsu9ICEntY9gFZpzOET2zf3vxDrnbnaJ/fYMVcceeBbpyyWeKaCl4ZCDao2g99fQ8IzxkI36CA2n1eybowCuWZINhsAahEu3QmjgJwPRA5aJCzu/teb8tOZwyGP+Bn6hlwBYMJArWt60vLTRskT6EfCBIU2kheLiuVakFdvNbn+hoiVP+h+FdmiZsoVfu5Ce9TwtwrbQFNJbgwbhXnhOyhcqW4EGYRPbuhglaS0NS/9hIP3e024r5t2ieniKX9OHDeSvoMUX4ibi8QUnxR9slGATGnZDOvNfmtM5STwV/AEKUi81GtQU3gAAAABJRU5ErkJggg==" class="ic ic-h28">
-          <b>10</b>
+          <b id="repostCount">10</b>
         </span>
-        <span class="act">
+        <span class="act" id="shareBtn">
           <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEsAAABECAYAAADJGMg/AAAFgElEQVR4nO2cUXIbNwyGP2XS+DK9QONWUjKNe56+OtNa7US+U9yZVMpE7lMP5D6YfeCypmgABFe7K7nxP7Pj9ZJLgiAAgiBWsxDCK57hwotjE/CU8MysBjwzqwEvs/sAzCr158CqqxeA83HImgQ7YEMcy2+eF2ZOA78ArnjazKnhmgrTXlqFHa6Ay0HIOW2kMa5QNExiVuj+zvh6GJWQxipKmKWGXxujclwA2/KhxKwZcA/8MwVVJ4yz8oG0Ggai3mrYEbm+QeD+E0AAlt1lac6CYnyaGv4JvFYaEUX0iWIO/KGU7YC3+QPNKdUYdc3xGBWySyuX7i18Jk6+hHOidP0HaTX81Wjc5byNhJrDPFPua3BPviRZ2qzsGggYC16JaYU2tmX+j8SsllkZGyUtY9AWiItVFZKBXwA3Sv0zHlbM/wsCupu0t5i1Rh0+cVqMGoKWlVG2Z88kZm3RdfichwVgCnW1+lgQXZy77rqiH/M0X2tdPtAMvLXqvac/Ya2Q+khMumE/CnJJYZAdsFb+RxOlGfgt8JfR0CWRYRZamSnVz58tiGbgBt0PXDb0tyBOvAQxXGPZrCW2u3CJb2a86irVS8+ueCxJLZCc2WV7KyG8Mq53oY4PlTZar7Ps/kdH/zm8fayNNtbae55IqeVKJJRiK4WoPWHrvM+WyOyu69/rjd8ZZY+iDQmeSOmW6G9YDDODZhlqDPuha6NF3d4R93ha2+Vzy9ZeG+9BCOGbiiq0qKQqwo7rg6P91r7KsVlj+CLU37teEI18afyklSlJmIWa0Zf6mBPVQluZSuw6OjQpzmkvJW1utLsV6hct+wztGBJ20c2mF19CNPgeGg816qKEeQx8uRcMwBvgY+U97Wipz7HaBQ9nfBasfWsvo57DszcsO58RCfeo5Kp41uovrYkDkVSk5sTmsEzDo22NBu8h6947PBDlcSsSMV6bBHBLZHRLVNZaaWtS5Yqk9Ml1uM/uk9G3PP33+Bl127X3hgdGebdNM2RmWVKVXAVXHy2SVfORrEOOGlqdSg9mwC/oE7UGfm9qsIeBt/CJ9v1bM9HIEyfRebBRz9HHwIMuYW/xx+pvgZ9oZ1Tev3Wi4/XUS6iC0cfAe/A38K1SdojKJenxSPugUgXjJbP9bJTlxrsVQflboq9UmRiCWZJKboz6ywH6zPsu+7cSWqo5WBaGYJYUWJuh266FUP/Q/nNY+Qs5o5rPEIZSQ2llWil1l0L9odCifs0TNoaBT8bXSrroZWAdGNyo5xhKDaX/PxvvLIyyvhjFqOcYy8AnTJUfYRn1NQMltAyphpLvow3iUe7TgWhRv97pB0P6WRIBG6Vu65bIGpxno1y21WuBGcuDz6HNeutBgyQRVlIH7EtVnoXdC1N8jlKzWx5GpWflfYtR10I4bkzBLG1rszLe8YSPr/Adv2sq3My4KdSwlu9Vg6amVjhoFD/umJIF+/6WJQHS/k9jlDum3oopJAv0KGrfNPGaq9B7xbMw1feGmtSsjHe0wXqMupWR0xtjMysRuFLK79k/AKnlstc89RR1bTkmc2NsZiV12Cjl37Mf39JmPw10qZRDVOfE+FGiGlOoYej60fwtz8CSq6CdHq3xnVgfhKkMPOhL/S0x1FwiSWXy3I9i1HNM+UG5tvN/jRyySQO/p79RHxRTShbo0qFFIQJxcbBi6ivktKnBMfVPFVj59XfECEIgStqc6J9ZMfUNE37xMbVkeRJJvDjopKYPppasLcOEeNNB7aSYWrIgqswW+O6ANsY68DBxrJ9XWdBfwmpJdKPBk9p9KKSIJ0Q1CrQl3g4Zt2/GMdRQwpzomC7Z/42bW+KKuOUEPmI/FWYljO6FH4Jj2SztYPZkGQXHY5aUG3Hy+BePpWQq/erUmAAAAABJRU5ErkJggg==" class="ic ic-h28">
         </span>
       </div>
-      <span class="save">
+      <span class="save" id="saveBtn">
         <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAD0AAABDCAYAAAAvSg1YAAAC/0lEQVR4nO2b7W7aMBSGn1QFrmljahka3T1RiY4NelGttpZpXFT/zPuRuDHG3+SD4bxSRMBf54nPcWI7FEKIMZnpqm8D+pAKLbS0oktDutSV5RyOL8L/rAOWa0vCCrjvxJz2tQXWyndxbch0ScBQs3yvPovCMHq/dWhQl5rIk2H07s2KblWo0Bd7i9JkHMhsmviznIW8Y1L2MZ2NBuhcNEDnogE6Fw3QuWiAzkUDdC4aoHPRAJ2LBuhcNEDnogG6IZ39pkHMYn+oQraHboFZdb525GtFMbuWTe1wmLaCt9RbqafKa3/XMf2Aee/7vkrrRE1A22JYd/MHYOmoZ0lH4E1A22JYvRg+YCkVvLUBsWn3FhxfhBVhwFLLqkxr++VNQRfKp97DKe+vtBrjbY7ev4CpI31PeYE+OvL8Aea4xw09rdXRWzamu6EgDHhOea/eO/J9Al4Mbeg2RCkWWm1Exm+hpb0QBizLzHGDT6s6TYBJcR8L7XqVUgCvhAOrdcyBR0e5KfAzzES/mhrIbimN+uDI88gxMNQXco0f/A24STHwsEUhxtphk0wfCSEmyvnCUUZqY2hHP0bV5zagvi+Oenz2j1N6uqCO5xnw5Mn/SNhztQwVX48DPFN6V5JOce8ZzQHrCgF/IhU8xT1EmEtvHS6oHxPL7yGurrfjtT8GOibmQmLYFtcj7bdNQHsSfOTIkwwdYkAqsOuI6XGbkqBjXW0ijnstxrX1sqEeZtN7XU2+730H7BLLhip0imrS+7N3U9AL4HeiMbG6obxlxarR5aIFdQ/rz8dNLgTIunaUXpWsU6HvKHtYnXGdOvn3LT8VnAieCr3HHsP6JCRWoWV2wNeE+pNi2jRT6kvyAvmms1DHdBHb0zpw37sZcnnKNydXJUzQtsKmHu76zy6uMSMY3ARtitNzcmmbd7l6/GDyYoppKB8CZpSLdhvgR7qNvWgFfK7OX4FvKHcYHboA/tJ/rOqSc/hUHayamv5Je27A4Ac2pau/HTBdyqa8qaOsnfcPfw28yoAbVl0AAAAASUVORK5CYII=" class="ic ic-h28">
       </span>
     </div>
@@ -281,6 +366,88 @@
   </div>
 
   <p class="edit-hint">Photo change karne ke liye img src wali link replace karo apni photo ke link se</p>
+
+  <!-- Toast notice -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Comments bottom sheet -->
+  <div class="comments-overlay" id="commentsOverlay">
+    <div class="comments-sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">Comments <span class="close-sheet" id="closeComments">&#10005;</span></div>
+      <div class="comments-list">
+        <div class="comment-row">
+          <img src="https://picsum.photos/seed/friend1/100" alt="">
+          <div class="comment-body">
+            <b>mangalesh</b>Happy birthday Velnox Labs! Bahut saara pyaar 🎉🎂
+            <div class="comment-meta"><span>2h</span><span>Reply</span></div>
+          </div>
+          <span class="comment-heart">&#9825;</span>
+        </div>
+        <div class="comment-row">
+          <img src="https://picsum.photos/seed/friend2/100" alt="">
+          <div class="comment-body">
+            <b>usp_visuals</b>HBD guys!! Aage bhi aise hi projects aate rahein 🔥
+            <div class="comment-meta"><span>2h</span><span>Reply</span></div>
+          </div>
+          <span class="comment-heart">&#9825;</span>
+        </div>
+        <div class="comment-row">
+          <img src="https://picsum.photos/seed/friend3/100" alt="">
+          <div class="comment-body">
+            <b>ritika.designs</b>Many many happy returns of the day 🎈🥳
+            <div class="comment-meta"><span>1h</span><span>Reply</span></div>
+          </div>
+          <span class="comment-heart">&#9825;</span>
+        </div>
+        <div class="comment-row">
+          <img src="https://picsum.photos/seed/friend4/100" alt="">
+          <div class="comment-body">
+            <b>dev_ankit</b>Happy birthday! Yahi speed rakho 🚀
+            <div class="comment-meta"><span>1h</span><span>Reply</span></div>
+          </div>
+          <span class="comment-heart">&#9825;</span>
+        </div>
+        <div class="comment-row">
+          <img src="https://picsum.photos/seed/friend5/100" alt="">
+          <div class="comment-body">
+            <b>studio.kavya</b>Wishing you an amazing year ahead 🎂✨
+            <div class="comment-meta"><span>45m</span><span>Reply</span></div>
+          </div>
+          <span class="comment-heart">&#9825;</span>
+        </div>
+        <div class="comment-row">
+          <img src="https://picsum.photos/seed/friend6/100" alt="">
+          <div class="comment-body">
+            <b>rahul_codes</b>HBD 🎉 keep building cool stuff
+            <div class="comment-meta"><span>30m</span><span>Reply</span></div>
+          </div>
+          <span class="comment-heart">&#9825;</span>
+        </div>
+        <div class="comment-row">
+          <img src="https://picsum.photos/seed/friend7/100" alt="">
+          <div class="comment-body">
+            <b>priya.creates</b>Happy birthday Velnox! 🥳🎂 So proud
+            <div class="comment-meta"><span>20m</span><span>Reply</span></div>
+          </div>
+          <span class="comment-heart">&#9825;</span>
+        </div>
+        <div class="comment-row">
+          <img src="https://picsum.photos/seed/friend8/100" alt="">
+          <div class="comment-body">
+            <b>tech_by_neha</b>Many happy returns!! 🎈🎉
+            <div class="comment-meta"><span>10m</span><span>Reply</span></div>
+          </div>
+          <span class="comment-heart">&#9825;</span>
+        </div>
+      </div>
+      <div class="comment-composer">
+        <img src="https://picsum.photos/seed/myprofile/100" alt="">
+        <input type="text" placeholder="Add a comment..." disabled>
+        <button type="button" id="postCommentBtn">Post</button>
+      </div>
+    </div>
+  </div>
 
   <div class="bottomnav">
     <span class="navicon">
@@ -346,6 +513,99 @@
     media.addEventListener('dblclick', function(){
       setLiked(true);
       showBurst();
+    });
+
+    // ===== Toast helper =====
+    var toast = document.getElementById('toast');
+    var toastTimer = null;
+    function showToast(msg){
+      toast.textContent = msg || 'Unable to process this request, try again later';
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function(){
+        toast.classList.remove('show');
+      }, 2600);
+    }
+
+    // ===== Small pop animation helper for icon buttons =====
+    function popIcon(el){
+      el.classList.remove('pop');
+      void el.offsetWidth;
+      el.classList.add('pop');
+    }
+
+    // ===== Comments sheet =====
+    var commentBtn = document.getElementById('commentBtn');
+    var commentsOverlay = document.getElementById('commentsOverlay');
+    var closeComments = document.getElementById('closeComments');
+    var postCommentBtn = document.getElementById('postCommentBtn');
+
+    function openComments(){
+      commentsOverlay.classList.add('open');
+    }
+    function closeCommentsSheet(){
+      commentsOverlay.classList.remove('open');
+    }
+    commentBtn.addEventListener('click', openComments);
+    closeComments.addEventListener('click', closeCommentsSheet);
+    commentsOverlay.addEventListener('click', function(e){
+      if(e.target === commentsOverlay) closeCommentsSheet();
+    });
+    postCommentBtn.addEventListener('click', function(){
+      showToast();
+    });
+
+    // ===== Repost (reshare) button =====
+    var repostBtn = document.getElementById('repostBtn');
+    var repostCount = document.getElementById('repostCount');
+    var reposted = false;
+    var repostBase = parseInt(repostCount.textContent, 10);
+    repostBtn.addEventListener('click', function(){
+      reposted = !reposted;
+      var img = repostBtn.querySelector('img');
+      img.classList.toggle('icon-active', reposted);
+      repostBase = reposted ? repostBase + 1 : repostBase - 1;
+      repostCount.textContent = repostBase;
+      popIcon(repostBtn);
+    });
+
+    // ===== Share button (paperplane) — shows toast =====
+    var shareBtn = document.getElementById('shareBtn');
+    shareBtn.addEventListener('click', function(){
+      popIcon(shareBtn);
+      showToast('Unable to process this request, try again later');
+    });
+
+    // ===== Save (bookmark) button =====
+    var saveBtn = document.getElementById('saveBtn');
+    var saved = false;
+    saveBtn.addEventListener('click', function(){
+      saved = !saved;
+      var img = saveBtn.querySelector('img');
+      img.classList.toggle('icon-active', saved);
+      popIcon(saveBtn);
+    });
+
+    // ===== Misc buttons: topbar inbox icon & post 3-dot menu =====
+    var topbarBtn = document.getElementById('topbarBtn');
+    if(topbarBtn){
+      topbarBtn.addEventListener('click', function(){
+        showToast();
+      });
+    }
+    var moreMenuBtn = document.getElementById('moreMenuBtn');
+    if(moreMenuBtn){
+      moreMenuBtn.addEventListener('click', function(){
+        showToast();
+      });
+    }
+
+    // ===== Stories: tap shows toast (dummy) =====
+    var storyEls = document.querySelectorAll('.story');
+    storyEls.forEach(function(s){
+      s.addEventListener('click', function(){
+        showToast();
+      });
     });
   })();
   </script>
