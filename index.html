@@ -103,6 +103,39 @@
   .act b{font-size:15px;font-weight:400;}
   .ic{display:block;}
   .ic-h28{height:24px;width:auto;}
+
+  /* Like heart icon */
+  #likeBtn{-webkit-tap-highlight-color:transparent;}
+  .heart-icon{
+    display:block;margin-right:6px;
+    fill:none;stroke:var(--text);stroke-width:1.8;
+    stroke-linecap:round;stroke-linejoin:round;
+    transform:scale(1);
+  }
+  .heart-icon.liked{fill:var(--accent);stroke:var(--accent);}
+  .heart-icon.pop{animation:heartPop .35s ease;}
+  @keyframes heartPop{
+    0%{transform:scale(1);}
+    35%{transform:scale(1.35);}
+    60%{transform:scale(0.9);}
+    100%{transform:scale(1);}
+  }
+
+  /* Double-tap burst heart on the photo */
+  .burst-heart{
+    position:absolute;top:50%;left:50%;
+    width:90px;height:90px;
+    transform:translate(-50%,-50%) scale(0);
+    fill:#fff;opacity:0;pointer-events:none;
+    filter:drop-shadow(0 3px 10px rgba(0,0,0,0.45));
+  }
+  .burst-heart.pop{animation:burstPop .9s ease;}
+  @keyframes burstPop{
+    0%{transform:translate(-50%,-50%) scale(0);opacity:0;}
+    15%{transform:translate(-50%,-50%) scale(1.15);opacity:1;}
+    30%{transform:translate(-50%,-50%) scale(1);opacity:1;}
+    100%{transform:translate(-50%,-50%) scale(1);opacity:0;}
+  }
   .post-stats{padding:2px 12px;font-size:13.5px;color:var(--muted);
     display:flex;gap:14px;}
   .post-caption{padding:6px 12px 4px;font-size:13.5px;}
@@ -126,13 +159,19 @@
     position:fixed;bottom:0;left:0;right:0;
     max-width:480px;margin:0 auto;
     background:#000;border-top:1px solid var(--border);
-    display:flex;justify-content:space-around;align-items:flex-end;
-    padding:8px 0 8px;
+    display:flex;justify-content:space-around;align-items:center;
+    padding:10px 0;
   }
-  .bottomnav .navicon{display:flex;align-items:flex-end;justify-content:center;}
+  .bottomnav .navicon{
+    display:flex;align-items:center;justify-content:center;
+  }
+  .bottomnav .navicon img{
+    display:block;
+  }
   .bottomnav img.profile-nav{
     width:24px;height:24px;border-radius:50%;object-fit:cover;
     border:1.5px solid var(--text);
+    display:block;
   }
 
   .edit-hint{
@@ -192,17 +231,23 @@
       </div>
       <svg class="ig" width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.5" fill="currentColor" stroke="none"/></svg>
     </div>
-    <div class="post-media">
+    <div class="post-media" id="postMedia">
       <img src="https://picsum.photos/seed/postmain/800/800" alt="post">
       <div class="post-counter">1/6</div>
+      <svg class="burst-heart" id="burstHeart" viewBox="0 0 24 24">
+        <path d="M12 21s-6.9-4.35-9.7-8.14C.4 10.4.9 6.4 4.2 4.7c2.3-1.2 5.1-.6 6.6 1.5l1.2 1.6 1.2-1.6c1.5-2.1 4.3-2.7 6.6-1.5 3.3 1.7 3.8 5.7 1.9 8.16C18.9 16.65 12 21 12 21z"/>
+      </svg>
     </div>
     <div class="post-dots">
       <span class="active"></span><span></span><span></span><span></span><span></span>
     </div>
     <div class="post-actions">
       <div class="actions-left">
-        <span class="act">
-          <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAE8AAABHCAYAAABGZxrrAAAF6UlEQVR4nO2c3XIbNwyFv/W09jO1ams1nSTvlEwt243kZ4qbxJIndp6pV+wFRYeiCBD7R+12emYykXYpgjwLEiCAdeOcO+d/dMJZBRlNx3uTRw3yXAUZJ0EN8jTMmthTkzdr/FBBxuX+/wbYVpQXsBtL0NDkhYGvgEWh7RpP6C3y8nWUjcqlUd4Tnshrpc9Uniq/MbgqDeW96XI/qJ8L7SRs8Fq5qyTvG/AA3HT8PWAjT8Nv+EmUnroVG+QJBVK/DCgvaGMnEi3kSap7BbzvItSANxzvVZfA/UjypIfWe9nmOhjy6UsIE3J47X43srxn4Pc2P2i7bK2bczqosIe1JTwYlbbEPUWf28h8Al5ZG7cl7x/jAMISkNyES2DJcNr0jNfOVF68alZ7uRarbCPQOXdu/PfB6fjqnHsdtb9Ifp9+t/arYd1i/OfOuR+N8r5a+rOStx54Em37zyF+UGPILM7Jumy15bpBdzytaGNNXwOPPeVZDFHO6r/Acra9Uu4FizhEaGmHH2wJb/HE9Q0qNPixf1DarLQOSuStkH252JUYCju8hZUQTiKWY1sM7fj3F4fWOcaC47PyC/pEVYJFHTqgeUt+MrEj21ZmI/wmXNOs67Vw3aV7XvpEpb1ujZ/kWMjtfxcD9Kudm1fI+98Fh9w4+K55ocO4c229S5GQ+FofjdzhNS1AW8oWxJPOjbtB1jDwPmk8nwZozqIvLxcjQTlsorbSILWBWnGDd36hn5an48iNO2jVc+YeeKN5NJd0z4sbDHHo77sf3nCogV36LrWL718LbRa5ftI9L1620n53bhjQUMgFJxlBfixHmveRbylpnmSen6hHHBlZktUcUo7kthzJlVyVU2W1pH1SGk/tvO/BSpDIWwrXtwMPJoeSIYoxxkPeCteXJK7O1FKPs6ogkMjbCteXjPO0p0SaRaGauGFKiDU1NxSsD6QGyZKx3EafD04YlnRfaHdKjGnISoeDo3taPE/yd95Sx3CcCtK8j87W2vqW/J1ZF+cUIJ3ns1xo5ElLdMV/j8DS4SAbTdbIk57CAtkPnCvO0FOq29zFeM/LWdIH8vUgrfKbM4GWp8nGEmPNS61NSJDksKAQ358ZtLncSTdK2TOH1z5JndXs0kxQytqJEeySN12KsN5zet/PCsnIacRJsUTAdhR5RHZbAD4zD+ube8gPSnut3M13aEh6O3z10EelzRwNiJbwAUPCyXoI3uIjqRKCAZmyBsaaVyLOlHBqE5J6RN8D3jFtCxwe7J/oxG3wifAiupTVlp7a1JZwCHo4/ArS6pjv0A3kAboEQ2/RNXCBrxydyhIO45Ac/oA1x8SpnkTXgu4GT1CpGn2IaqY+cPijZKmatdNqsWpe+gSCBVb9IOBvlEKZgeCEz+CJu0cn7hmZOFXzrOTFR7Z4gDeULdM93QxJWt7Qtt2Kcr3fBr2IW9162r4BlJtEKIXQKgyCgWnzvoOmUSWUjBoYnOASzMmODOIJlYwI+MlohZK5fi330vFZiFvTkziwkWdNOGt1JQHv0Qm0aFjaJv5u1bhByuP6vj6Vg+XNoDF8wS3wU6FNHAWK45e5BFgxUzhG0vuWcm1x8AWhnz/o8Nb8C+2Ig0PCcsQVuemiedY0JfiIyy+FNn2ycUv0gAUca3laadVmPgfoonltBP1BeR/8CPzaUqbb/6ZEXM6HSyutOmt+jVoViyH5hO4LpnvP9f43Gko+XG/UKvSxEBhHZTRtuMJmUa9NI+uBGn9jICD4VdrEJWc67EsWV+SO4V6sUVGTPLAT6Dj0xRy2d3x7nxraYAw/T5TFYWa+dO58xmtag+0d3+qZvJrkpbAQaMUbvLtTNZNXszI0Tarv8EkWLTNXwtO+jx35Yu9RA7I1yZNeA3hF2RLn8I1jH85apDkIplKTbIkLxlgzgWKjqZAHtrAWVLaoGk5pMCQs8X/sJo3MSH+E4WSYCnm516Qavuc/JkNYjKmQlyKNtYVrk8KU9rwY0qunkyJyquRJGOutx06YG3mTwr+XUqL4spMkdAAAAABJRU5ErkJggg==" class="ic ic-h28">
+        <span class="act" id="likeBtn">
+          <svg class="heart-icon" width="24" height="24" viewBox="0 0 24 24">
+            <path d="M12 21s-6.9-4.35-9.7-8.14C.4 10.4.9 6.4 4.2 4.7c2.3-1.2 5.1-.6 6.6 1.5l1.2 1.6 1.2-1.6c1.5-2.1 4.3-2.7 6.6-1.5 3.3 1.7 3.8 5.7 1.9 8.16C18.9 16.65 12 21 12 21z"/>
+          </svg>
+          <b id="likeCount">128</b>
         </span>
         <span class="act">
           <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEQAAABHCAYAAAC+h+EcAAAFNklEQVR4nOWc227jNhCGPwlt+kyNgdgtmj5UskicoknfqQts5IXtd9q9iPaCmpiiODxIcixpf8CwLFGj4a/hzPDkoq7rK4ahBormuGh+x1AAb9Z9Oc84K8oRZNgkpJAh5XKe3ecZvTAWIfIRpCidW7HC+T4LxiDE9+bGkHsR/HImudLmhaQb4I/meGNdv27OHZrfr7Qt4Mk6TvVPg1CM4FR9WGOUf+JU6b44ADva5MCZHO3YhDxiLGAoCRqOQEWXnNEwFiEPwP0IcnLwDPzTHI9mLUMJWQP/j6HIANjEDEbfaLAGvnB5MsBY5jdMcx2MPlHmEbjLvOfQfFfAV05ZatV83zTfa+ue3CZ418jYZt7XQm6TySHjwImAKlAu1P7XGCe9BlaJzx3UhHIIeSUtehwwUWDXV6kAUp33EUMkZDrbFEJugM8Jss5JhI0tpsmlEPM3mfqkEPItcn1sIlJDaGrz/S3n4S4hrjKxZnLklJJfCl8I+5cDJx2jRJdOIfv4kTAZL1yeDDA6PAeurzB10erZQom/wxQzxxdMM/mQQZsICowuL4Ey97TDsdS5o7/dZKS55JBx9t5nJmK6R52sz4d8D5R/5kTGFAmBcGiO+jw3dd8Gyh4xCY+Y2RTJAKPjQbl2TTsb7sC1kFCIzQpfE0Ao+qh1sS3kISA85MWnitCYiVpX20I06xi1e/3ByLYSsZBtQOgUQmtfhKzEO1wghGiORqLKnGA7+x26g934TkqT0ZrLFfO2EAiP6nXykhJ9pEmmBlxMMdz6dBLdQ1bSkVOimA56RjdFi4m9OK0urjEUJXoHzifEfRNTtBYfKuX8CqcOoUFmV4hv/naK1uLDDtgr11qpvEaIJGKhCey5kCEIjdu+QyNk6v2VPkga0dMIWRIRgko5n9RktJuXiGSnujRoPqRFSFHXta95LCFDtSGDWdGM/GeykCRohARHlWaIGr1OrS7Kz2AhUtlN5DoQJ2QJfiSWQlR2WY2QTaKwpaGIEbIkbJTzWU1mSXhTzr/aP7Q8BHosJZg4tBykNdhckjnmOFMkjwqW6IPIS8pFtPneHRl9mRXzJ6UmvDqxYwwlhqWjckNnzLGfXheDu7LRhnc2UixEc56ulcwtLwmtXvS+XJmXCS2DOAB/WkLmREpovUhwKrNAn9C2rWQOZNhvfqOUUSfvU5dD2FYyJ2j1ucUsKO7AjTK3ioAVp4xuDlYiOqbO2L3DJeRrQMg13dV8U4Q9f6QFC3UC3yVEVvRpuKMdii9hLbHJMlunSpGhLjd1CakxrIaWONqkDLGWpHWjHtgV9kW9lDldOG2Da0HLVJ+A/wLChJQhFlIrx6FyIQg5LrmaC9h6ygZn7rboGSwYUkJvQKtIbuVj1mNvk/WVzVrw4yPENsPY0u3fMaHNt4it79qSnN3h7nPUFcoeeP2IEGKz7Cr0V4LwewwpsWbkriBIue7Kk+1t3zEvQ7aX2RHQ9SOapXf7OXVdXyV+9nUa/nXu+zXjGe7Hvvc2UYd9o8Ntgu5795m5W8xytqPKHtsd/eeKN8R3ZcTw3MjxdfI6GXgqIbZf6bMJURQTk5asV5zymlNXfWPdk7rPbghaQ6V99+32JWWKGIUQwRKIae2QGGur+yWIkb1+m+b3kOe/j430JUQbKHrAsP2Rf4ZgJ2Tig96ATxlyswjps9qwxmS6ORuQNewx+dKWtHkiW19JGEORUXaIAekWMnQJpjtYLVHFtiTpcxQYK6ia32NOloke0rxaZADF2P8fUqNvbLTxEWOzKS+xU+YHLhhYpaQzBLYAAAAASUVORK5CYII=" class="ic ic-h28">
@@ -252,6 +297,58 @@
     </span>
     <img class="profile-nav" src="https://picsum.photos/seed/myprofile/100" alt="profile">
   </div>
+
+  <script>
+  (function(){
+    var likeBtn = document.getElementById('likeBtn');
+    var heart = likeBtn.querySelector('.heart-icon');
+    var likeCount = document.getElementById('likeCount');
+    var media = document.getElementById('postMedia');
+    var burst = document.getElementById('burstHeart');
+    var liked = false;
+    var baseCount = parseInt(likeCount.textContent, 10);
+
+    function setLiked(state){
+      if(state === liked) return;
+      liked = state;
+      heart.classList.toggle('liked', liked);
+      baseCount = liked ? baseCount + 1 : baseCount - 1;
+      likeCount.textContent = baseCount;
+      heart.classList.remove('pop');
+      void heart.offsetWidth; // restart animation
+      heart.classList.add('pop');
+    }
+
+    // Tap / click on heart icon toggles like/unlike
+    likeBtn.addEventListener('click', function(){
+      setLiked(!liked);
+    });
+
+    function showBurst(){
+      burst.classList.remove('pop');
+      void burst.offsetWidth; // restart animation
+      burst.classList.add('pop');
+    }
+
+    // Double-tap on photo (mobile/touch)
+    var lastTap = 0;
+    media.addEventListener('touchend', function(e){
+      var now = Date.now();
+      if(now - lastTap < 300){
+        setLiked(true);
+        showBurst();
+        e.preventDefault();
+      }
+      lastTap = now;
+    });
+
+    // Double-click on photo (desktop/mouse)
+    media.addEventListener('dblclick', function(){
+      setLiked(true);
+      showBurst();
+    });
+  })();
+  </script>
 
 </body>
 </html>
